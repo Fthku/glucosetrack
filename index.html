@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1117" />
+  <title>סוכר</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600&family=Rubik+Mono+One&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--surface3:#242840;
+      --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+      --text:#f0f2f8;--text2:#a0a8c0;--text3:#6b7491;
+      --green:#3ecf8e;--green-bg:rgba(62,207,142,0.13);--green-border:rgba(62,207,142,0.3);
+      --amber:#f5a623;--amber-bg:rgba(245,166,35,0.13);--amber-border:rgba(245,166,35,0.3);
+      --red:#f4645f;--red-bg:rgba(244,100,95,0.13);--red-border:rgba(244,100,95,0.3);
+      --blue:#4f9cf9;--blue-bg:rgba(79,156,249,0.13);
+      --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;overscroll-behavior:none;}
+    body{padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);}
+    .app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;}
+
+    /* TOPBAR */
+    .topbar{padding:16px 20px 0;background:var(--bg);position:sticky;top:var(--safe-top);z-index:10;}
+    .topbar-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;}
+    .topbar h1{font-family:'Rubik Mono One',monospace;font-size:20px;font-weight:400;letter-spacing:-0.5px;}
+    .topbar-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+    .export-btns{display:flex;gap:6px;}
+    .export-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:500;font-family:'Rubik',sans-serif;color:var(--text2);cursor:pointer;white-space:nowrap;}
+    .export-btn:active{background:var(--surface3);}
+    .tabs{display:flex;border-bottom:1px solid var(--border);}
+    .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;font-family:'Rubik',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;}
+    .tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+    .scroll-area{flex:1;overflow-y:auto;padding:16px 16px 40px;}
+    .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+    /* ADD ENTRY */
+    .add-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:16px;}
+    .add-card h3{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;}
+
+    .field{margin-bottom:12px;}
+    .field label{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+    .field input,.field textarea,.field select{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:16px;font-family:'Rubik',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;-webkit-appearance:none;}
+    .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);}
+    .field input::placeholder,.field textarea::placeholder{color:var(--text3);}
+    .field textarea{resize:none;height:70px;font-size:14px;}
+    .field select{color:var(--text);background-image:none;}
+    .field select option{background:var(--surface2);}
+
+    .field-row{display:flex;gap:10px;}
+    .field-row .field{flex:1;margin-bottom:0;}
+
+    /* TYPE TOGGLE */
+    .type-toggle{display:flex;background:var(--surface2);border-radius:12px;padding:3px;margin-bottom:14px;}
+    .type-btn{flex:1;padding:9px;border:none;border-radius:10px;font-size:13px;font-weight:500;font-family:'Rubik',sans-serif;cursor:pointer;background:none;color:var(--text3);transition:all 0.15s;}
+    .type-btn.active-fast{background:var(--surface);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+    .type-btn.active-after{background:var(--surface);color:var(--green);box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+
+    .add-btn{width:100%;background:var(--blue);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;font-family:'Rubik',sans-serif;color:#fff;cursor:pointer;margin-top:4px;transition:opacity 0.15s,transform 0.12s;}
+    .add-btn:active{transform:scale(0.98);opacity:0.9;}
+    .add-btn:disabled{opacity:0.3;}
+
+    /* STATS ROW */
+    .stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;}
+    .stat-val{font-family:'Rubik Mono One',monospace;font-size:22px;font-weight:400;line-height:1;margin-bottom:3px;}
+    .stat-label{font-size:10px;color:var(--text3);line-height:1.3;}
+    .stat-card.green .stat-val{color:var(--green);}
+    .stat-card.amber .stat-val{color:var(--amber);}
+    .stat-card.red .stat-val{color:var(--red);}
+
+    /* GRAPH */
+    .graph-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:16px;}
+    .graph-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .graph-title{font-size:13px;font-weight:600;color:var(--text2);}
+    .graph-toggle{display:flex;background:var(--surface2);border-radius:8px;padding:2px;gap:2px;}
+    .graph-toggle-btn{padding:5px 10px;border:none;border-radius:7px;font-size:11px;font-weight:500;font-family:'Rubik',sans-serif;cursor:pointer;background:none;color:var(--text3);}
+    .graph-toggle-btn.active{background:var(--surface3);color:var(--text);}
+    canvas#glucoseChart{width:100%!important;border-radius:8px;}
+    .zoom-toggle{display:flex;gap:4px;margin-bottom:10px;}
+    .zoom-btn{padding:4px 10px;border:1px solid var(--border2);border-radius:7px;font-size:11px;font-weight:500;font-family:'Rubik',sans-serif;cursor:pointer;background:none;color:var(--text3);}
+    .zoom-btn.active{background:var(--surface3);color:var(--text);border-color:var(--blue);}
+    #graph-fullscreen{display:none;}
+    #graph-fullscreen.open{display:flex!important;}
+
+    /* TABLE */
+    .table-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:16px;}
+    .week-header{padding:12px 16px;background:var(--surface2);font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center;}
+    .week-avg{font-family:'Rubik Mono One',monospace;font-size:14px;font-weight:400;}
+    .week-avg.green{color:var(--green);}
+    .week-avg.amber{color:var(--amber);}
+    .week-avg.red{color:var(--red);}
+
+    .entry-row{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);transition:background 0.1s;}
+    .entry-row:last-child{border-bottom:none;}
+    .entry-row:active{background:var(--surface2);}
+
+    .entry-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .entry-dot.green{background:var(--green);}
+    .entry-dot.amber{background:var(--amber);}
+    .entry-dot.red{background:var(--red);}
+
+    .entry-main{flex:1;}
+    .entry-val{font-family:'Rubik Mono One',monospace;font-size:18px;font-weight:400;}
+    .entry-val.green{color:var(--green);}
+    .entry-val.amber{color:var(--amber);}
+    .entry-val.red{color:var(--red);}
+    .entry-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+    .entry-note{font-size:12px;color:var(--text2);margin-top:3px;font-style:italic;}
+    .entry-type{font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;flex-shrink:0;}
+    .entry-type.fast{background:var(--blue-bg);color:var(--blue);}
+    .entry-type.after{background:var(--green-bg);color:var(--green);}
+    .entry-del{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;}
+    .entry-del:active{color:var(--red);}
+
+    .empty-state{text-align:center;padding:50px 20px;color:var(--text3);font-size:14px;}
+    .empty-icon{font-size:36px;margin-bottom:12px;}
+
+    /* MODAL */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:50;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+    .modal-backdrop.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--surface);border-radius:24px 24px 0 0;padding:0 20px calc(24px + var(--safe-bottom));width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);}
+    .modal-backdrop.open .modal{transform:translateY(0);}
+    .modal-handle{width:36px;height:4px;background:var(--border2);border-radius:4px;margin:12px auto 18px;}
+    .modal h3{font-size:16px;font-weight:600;margin-bottom:16px;}
+    .modal-save{width:100%;background:var(--blue);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;font-family:'Rubik',sans-serif;color:#fff;cursor:pointer;margin-top:8px;}
+    .modal-cancel{width:100%;background:none;border:none;padding:10px;font-size:14px;color:var(--text3);font-family:'Rubik',sans-serif;cursor:pointer;margin-top:4px;}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1>מעקב סוכר</h1>
+        <div class="topbar-sub">סוכרת היריון</div>
+      </div>
+      <div class="export-btns">
+        <button class="export-btn" onclick="exportCSV()">CSV</button>
+        <button class="export-btn" onclick="exportPDF()">PDF</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('add',this)">הוסף</button>
+      <button class="tab" onclick="switchTab('graph',this)">גרף</button>
+      <button class="tab" onclick="switchTab('table',this)">טבלה</button>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- ADD TAB -->
+    <div class="tab-panel active" id="panel-add">
+      <div class="add-card">
+        <h3>מדידה חדשה</h3>
+
+        <div class="type-toggle">
+          <button class="type-btn" id="type-fast" onclick="setType('fast')">🌙 בצום</button>
+          <button class="type-btn" id="type-after" onclick="setType('after')">🍽️ אחרי ארוחה</button>
+        </div>
+
+        <div class="field">
+          <label>רמת סוכר (mg/dL)</label>
+          <input type="number" inputmode="decimal" id="glucose-val" placeholder="120" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>תאריך</label>
+            <input type="date" id="entry-date" />
+          </div>
+          <div class="field">
+            <label>שעה</label>
+            <input type="time" id="entry-time" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>הערות (אופציונלי)</label>
+          <textarea id="entry-notes" placeholder="למשל: אכלתי פיצה, לא ישנתי טוב..."></textarea>
+        </div>
+
+        <button class="add-btn" id="add-btn" onclick="addEntry()">שמור מדידה</button>
+      </div>
+
+      <button onclick="confirmDeleteAll()" style="width:100%;margin-top:10px;background:none;border:1px solid var(--red-border,rgba(244,100,95,0.3));border-radius:12px;padding:12px;font-size:13px;font-weight:500;font-family:'Rubik',sans-serif;color:var(--red);cursor:pointer;transition:background 0.15s;">
+        🗑️ מחק את כל הנתונים
+      </button>
+    </div>
+
+    <!-- GRAPH TAB -->
+    <div class="tab-panel" id="panel-graph">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="graph-card">
+        <div class="graph-header">
+          <div class="graph-title">רמות סוכר לאורך זמן</div>
+          <div class="graph-toggle">
+            <button class="graph-toggle-btn active" id="gtoggle-all" onclick="setGraphType('all',this)">הכל</button>
+            <button class="graph-toggle-btn" id="gtoggle-fast" onclick="setGraphType('fast',this)">בצום</button>
+            <button class="graph-toggle-btn" id="gtoggle-after" onclick="setGraphType('after',this)">אחרי ארוחה</button>
+          </div>
+        </div>
+        <div class="zoom-toggle">
+          <button class="zoom-btn" id="ztoggle-7" onclick="setZoom(7,this)">7 ימים</button>
+          <button class="zoom-btn" id="ztoggle-30" onclick="setZoom(30,this)">30 ימים</button>
+          <button class="zoom-btn" id="ztoggle-90" onclick="setZoom(90,this)">90 ימים</button>
+          <button class="zoom-btn active" id="ztoggle-0" onclick="setZoom(0,this)">הכל</button>
+        </div>
+        <div id="agg-notice" style="display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--text2);line-height:1.4">
+          📊 <strong>ממוצע יומי</strong> — כל נקודה מייצגת את ממוצע כל המדידות של אותו יום. חריגות בודדות לא נראות כאן — השתמשי ב-7 או 30 ימים לפרטים מלאים.
+        </div>
+        <canvas id="glucoseChart" height="220" onclick="openFullscreen()" style="cursor:pointer" title="לחץ להגדלה"></canvas>
+        <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:5px">לחץ על הגרף להגדלה</div>
+      </div>
+    </div>
+
+    <!-- TABLE TAB -->
+    <div class="tab-panel" id="panel-table">
+      <div id="table-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DELETE ALL MODAL -->
+<div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:28px 24px;width:100%;max-width:340px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:12px;">⚠️</div>
+    <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:8px;">מחיקת כל הנתונים</div>
+    <div style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:20px;">
+      פעולה זו תמחק לצמיתות את כל המדידות שנשמרו.<br>
+      <strong style="color:var(--red)">לא ניתן לשחזר.</strong>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeDeleteModal()" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:13px;font-size:14px;font-weight:500;font-family:'Rubik',sans-serif;color:var(--text2);cursor:pointer;">ביטול</button>
+      <button onclick="deleteAllConfirmed()" style="flex:1;background:var(--red);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:600;font-family:'Rubik',sans-serif;color:#fff;cursor:pointer;">מחק הכל</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN GRAPH MODAL -->
+<div id="graph-fullscreen" onclick="closeFullscreen()" style="display:none;position:fixed;inset:0;background:#0f1117;z-index:100;flex-direction:column;padding:0;">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0;">
+    <div style="font-size:14px;font-weight:600;color:var(--text2)">רמות סוכר לאורך זמן</div>
+    <button onclick="closeFullscreen()" style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Rubik',sans-serif;">✕ סגור</button>
+  </div>
+  <div style="display:flex;gap:4px;padding:0 16px 10px;flex-shrink:0;" id="fs-zoom-row"></div>
+  <div style="flex:1;padding:0 16px 16px;display:flex;flex-direction:column;">
+    <canvas id="glucoseChartFS" style="width:100%;flex:1;border-radius:10px;"></canvas>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-backdrop" id="edit-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>עריכת מדידה</h3>
+    <div class="type-toggle">
+      <button class="type-btn" id="edit-type-fast" onclick="setEditType('fast')">🌙 בצום</button>
+      <button class="type-btn" id="edit-type-after" onclick="setEditType('after')">🍽️ אחרי ארוחה</button>
+    </div>
+    <div class="field">
+      <label>רמת סוכר (mg/dL)</label>
+      <input type="number" inputmode="decimal" id="edit-val" />
+    </div>
+    <div class="field-row">
+      <div class="field"><label>תאריך</label><input type="date" id="edit-date" /></div>
+      <div class="field"><label>שעה</label><input type="time" id="edit-time" /></div>
+    </div>
+    <div class="field">
+      <label>הערות</label>
+      <textarea id="edit-notes"></textarea>
+    </div>
+    <button class="modal-save" onclick="saveEdit()">שמור</button>
+    <button class="modal-cancel" onclick="closeModal()">ביטול</button>
+  </div>
+</div>
+
+<script>
+// ── STORAGE ───────────────────────────────────────────────────────────────
+const STORE_KEY = 'glucosetrack_v1';
+let entries = []; // {id, val, type:'fast'|'after', ts:ISO, notes}
+let editId = null;
+let editType = 'after';
+let addType = 'after';
+let graphType = 'all';
+
+function load() {
+  try { entries = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch { entries = []; }
+}
+function save() { localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }
+
+// ── TIME (Israel = UTC+3 always for our purposes, use local) ─────────────
+function nowIsrael() {
+  // Use device local time — user should have device set to Israel timezone
+  return new Date();
+}
+
+function isoToLocal(iso) { return new Date(iso); }
+
+function fmtDate(iso) {
+  const d = isoToLocal(iso);
+  return d.toLocaleDateString('he-IL', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function fmtTime(iso) {
+  const d = isoToLocal(iso);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function fmtDateShort(iso) {
+  const d = isoToLocal(iso);
+  return `${d.getDate()}/${d.getMonth()+1}`;
+}
+
+function getWeekKey(iso) {
+  const d = isoToLocal(iso);
+  const day = d.getDay(); // 0=Sunday
+  // Week starts on Sunday — go back to the most recent Sunday
+  const sun = new Date(d);
+  sun.setDate(d.getDate() - day);
+  return sun.toLocaleDateString('he-IL', { day:'numeric', month:'short' });
+}
+
+// ── COLOR ─────────────────────────────────────────────────────────────────
+function colorClass(val, type) {
+  if (type === 'fast') {
+    if (val < 90) return 'green';
+    if (val <= 95) return 'amber';
+    return 'red';
+  } else {
+    if (val <= 130) return 'green';
+    if (val <= 140) return 'amber';
+    return 'red';
+  }
+}
+
+function colorHex(cls) {
+  if (cls === 'green') return '#3ecf8e';
+  if (cls === 'amber') return '#f5a623';
+  return '#f4645f';
+}
+
+// ── AUTO TYPE ─────────────────────────────────────────────────────────────
+function autoType() {
+  const h = new Date().getHours();
+  return h < 8 ? 'fast' : 'after';
+}
+
+// ── SET DEFAULTS ──────────────────────────────────────────────────────────
+function setDefaults() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('entry-date').value = dateStr;
+  document.getElementById('entry-time').value = timeStr;
+  const auto = autoType();
+  setType(auto);
+}
+
+// ── TYPE TOGGLE ───────────────────────────────────────────────────────────
+function setType(t) {
+  addType = t;
+  document.getElementById('type-fast').className = `type-btn${t==='fast' ? ' active-fast' : ''}`;
+  document.getElementById('type-after').className = `type-btn${t==='after' ? ' active-after' : ''}`;
+}
+
+function setEditType(t) {
+  editType = t;
+  document.getElementById('edit-type-fast').className = `type-btn${t==='fast' ? ' active-fast' : ''}`;
+  document.getElementById('edit-type-after').className = `type-btn${t==='after' ? ' active-after' : ''}`;
+}
+
+// ── ADD ENTRY ─────────────────────────────────────────────────────────────
+function addEntry() {
+  const val = parseFloat(document.getElementById('glucose-val').value);
+  const date = document.getElementById('entry-date').value;
+  const time = document.getElementById('entry-time').value;
+  const notes = document.getElementById('entry-notes').value.trim();
+  if (!val || val <= 0 || !date || !time) return;
+  const ts = new Date(`${date}T${time}:00`).toISOString();
+  entries.push({ id: Date.now(), val, type: addType, ts, notes });
+  entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+  save();
+  document.getElementById('glucose-val').value = '';
+  document.getElementById('entry-notes').value = '';
+  setDefaults();
+  // brief feedback
+  const btn = document.getElementById('add-btn');
+  btn.textContent = '✓ נשמר!';
+  setTimeout(() => { btn.textContent = 'שמור מדידה'; }, 1200);
+}
+
+// ── DELETE ────────────────────────────────────────────────────────────────
+function deleteEntry(id) {
+  if (!confirm('למחוק מדידה זו?')) return;
+  entries = entries.filter(e => e.id !== id);
+  save();
+  renderTable();
+  renderGraph();
+  renderStats();
+}
+
+// ── EDIT ──────────────────────────────────────────────────────────────────
+function openEdit(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  editId = id;
+  const d = isoToLocal(e.ts);
+  document.getElementById('edit-val').value = e.val;
+  document.getElementById('edit-date').value = d.toLocaleDateString('en-CA');
+  document.getElementById('edit-time').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('edit-notes').value = e.notes || '';
+  setEditType(e.type);
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function saveEdit() {
+  const val = parseFloat(document.getElementById('edit-val').value);
+  const date = document.getElementById('edit-date').value;
+  const time = document.getElementById('edit-time').value;
+  const notes = document.getElementById('edit-notes').value.trim();
+  if (!val || !date || !time) return;
+  const ts = new Date(`${date}T${time}:00`).toISOString();
+  const idx = entries.findIndex(x => x.id === editId);
+  if (idx >= 0) entries[idx] = { ...entries[idx], val, type: editType, ts, notes };
+  entries.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+  save();
+  closeModal();
+  renderTable();
+  renderGraph();
+  renderStats();
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('edit-modal')) return;
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'graph') { renderStats(); renderGraph(); }
+  if (tab === 'table') renderTable();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function renderStats() {
+  const all = entries;
+  if (all.length === 0) { document.getElementById('stats-row').innerHTML = ''; return; }
+  const avg = Math.round(all.reduce((s,e) => s+e.val, 0) / all.length);
+  const inRange = all.filter(e => colorClass(e.val, e.type) === 'green').length;
+  const pct = Math.round(inRange / all.length * 100);
+  const last = all[0];
+  const lastCls = colorClass(last.val, last.type);
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card ${lastCls}">
+      <div class="stat-val">${last.val}</div>
+      <div class="stat-label">אחרון</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--blue)">${avg}</div>
+      <div class="stat-label">ממוצע<br>כללי</div>
+    </div>
+    <div class="stat-card ${pct >= 80 ? 'green' : pct >= 60 ? 'amber' : 'red'}">
+      <div class="stat-val">${pct}%</div>
+      <div class="stat-label">בטווח<br>תקין</div>
+    </div>`;
+}
+
+// ── GRAPH ─────────────────────────────────────────────────────────────────
+let chartInstance = null;
+let zoomDays = 0; // 0 = all
+
+function setZoom(days, el) {
+  zoomDays = days;
+  document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderGraph();
+}
+
+function setGraphType(t, el) {
+  graphType = t;
+  document.querySelectorAll('.graph-toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderGraph();
+}
+
+function renderGraph() {
+  let filtered = graphType === 'all' ? entries : entries.filter(e => e.type === graphType);
+
+  // Apply zoom — filter by date range
+  if (zoomDays > 0) {
+    const cutoff = Date.now() - zoomDays * 24 * 60 * 60 * 1000;
+    filtered = filtered.filter(e => new Date(e.ts).getTime() >= cutoff);
+  }
+
+  let sorted = [...filtered].sort((a,b) => new Date(a.ts) - new Date(b.ts));
+
+  const canvas = document.getElementById('glucoseChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+  if (sorted.length === 0) {
+    // Draw empty state
+    const W = canvas.offsetWidth || 400;
+    const H = 220;
+    canvas.width = W * window.devicePixelRatio;
+    canvas.height = H * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.fillStyle = '#1e2333';
+    ctx.beginPath(); ctx.roundRect(0,0,W,H,8); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = '13px Rubik';
+    ctx.textAlign = 'center';
+    ctx.fillText('אין נתונים בטווח הנבחר', W/2, H/2);
+    return;
+  }
+
+  // Aggregate by day for 90+ days, or "all" with many points (>40)
+  const shouldAggregate = zoomDays >= 90 || (zoomDays === 0 && sorted.length > 40);
+
+  let labels, values, colors;
+
+  if (shouldAggregate) {
+    // Group by day, compute daily average
+    const days = {};
+    sorted.forEach(e => {
+      const key = new Date(e.ts).toLocaleDateString('en-CA');
+      if (!days[key]) days[key] = [];
+      days[key].push(e);
+    });
+    const dayKeys = Object.keys(days).sort();
+    labels = dayKeys.map(k => {
+      const d = new Date(k);
+      return `${d.getDate()}/${d.getMonth()+1}`;
+    });
+    values = dayKeys.map(k => Math.round(days[k].reduce((s,e) => s+e.val,0) / days[k].length));
+    // Color of avg vs threshold
+    colors = dayKeys.map((k,i) => {
+      // Use 'after' threshold for mixed, per-type if filtered
+      const type = graphType === 'fast' ? 'fast' : 'after';
+      return colorHex(colorClass(values[i], type));
+    });
+  } else {
+    // Always show date/day labels — never raw time
+    labels = sorted.map(e => {
+      const d = new Date(e.ts);
+      if (zoomDays === 7) {
+        // 7 days: show day + date e.g. "ו 16/6"
+        const days = ['א','ב','ג','ד','ה','ו','ש'];
+        return `${days[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+      }
+      return fmtDateShort(e.ts);
+    });
+    values = sorted.map(e => e.val);
+    colors = sorted.map(e => colorHex(colorClass(e.val, e.type)));
+  }
+
+  // X tick reduction — max 8 labels
+  const maxTicks = 8;
+  const step = Math.max(1, Math.ceil(labels.length / maxTicks));
+
+  const limitLine = graphType === 'fast' ? 95 : graphType === 'after' ? 140 : null;
+
+  // Show/hide aggregation notice
+  const notice = document.getElementById('agg-notice');
+  if (notice) notice.style.display = shouldAggregate ? 'block' : 'none';
+
+  // Build tooltip data
+  let tooltipData;
+  if (shouldAggregate) {
+    // For aggregated: store count of measurements per day
+    const days2 = {};
+    sorted.forEach(e => {
+      const key = new Date(e.ts).toLocaleDateString('en-CA');
+      if (!days2[key]) days2[key] = [];
+      days2[key].push(e);
+    });
+    const dayKeys2 = Object.keys(days2).sort();
+    tooltipData = dayKeys2.map(k => ({
+      aggregated: true,
+      count: days2[k].length,
+      date: new Date(k).toLocaleDateString('he-IL', { day:'numeric', month:'long' })
+    }));
+  } else {
+    tooltipData = sorted.map(e => ({
+      aggregated: false,
+      time: fmtTime(e.ts),
+      date: fmtDate(e.ts),
+      type: e.type === 'fast' ? 'בצום' : 'אחרי ארוחה',
+      notes: e.notes || ''
+    }));
+  }
+
+  chartInstance = new SimpleChart(ctx, { labels, values, colors, step, limitLine, aggregated: shouldAggregate, tooltipData, canvasId: 'glucoseChart' });
+}
+
+// Simple canvas chart (no external lib needed)
+function SimpleChart(ctx, { labels, values, colors, threshold, step, limitLine, aggregated, tooltipData, canvasId, w, h }) {
+  const canvas = ctx.canvas;
+  const W = w || canvas.offsetWidth || 400;
+  const H = h || 220;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const pad = { top: 20, right: 20, bottom: 40, left: 44 };
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+  const n = values.length;
+  const dotR = n > 30 ? 3 : 5;
+
+  const minV = Math.max(0, Math.min(...values) - 20);
+  const maxV = Math.max(...values) + 20;
+
+  function xPos(i) { return pad.left + (i / Math.max(n-1,1)) * cw; }
+  function yPos(v) { return pad.top + ch - ((v - minV) / (maxV - minV)) * ch; }
+
+  function draw(highlightIdx) {
+    // Background
+    ctx.fillStyle = '#1e2333';
+    ctx.beginPath(); ctx.roundRect(0, 0, W, H, 8); ctx.fill();
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + (ch / 4) * i;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+      const val = Math.round(maxV - ((maxV-minV)/4)*i);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '10px Rubik';
+      ctx.textAlign = 'right';
+      ctx.fillText(val, pad.left - 5, y + 4);
+    }
+
+    // Threshold line
+    if (limitLine && limitLine >= minV && limitLine <= maxV) {
+      const ly = yPos(limitLine);
+      ctx.strokeStyle = 'rgba(244,100,95,0.5)';
+      ctx.setLineDash([4,4]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(pad.left, ly); ctx.lineTo(W - pad.right, ly); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(244,100,95,0.7)';
+      ctx.font = '10px Rubik';
+      ctx.textAlign = 'left';
+      ctx.fillText(limitLine, W - pad.right + 2, ly + 4);
+    }
+
+    // Line
+    if (n > 1) {
+      ctx.beginPath();
+      ctx.moveTo(xPos(0), yPos(values[0]));
+      for (let i = 1; i < n; i++) ctx.lineTo(xPos(i), yPos(values[i]));
+      ctx.strokeStyle = 'rgba(79,156,249,0.4)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Dots
+    for (let i = 0; i < n; i++) {
+      const x = xPos(i), y = yPos(values[i]);
+      const isHl = highlightIdx === i;
+      ctx.beginPath();
+      ctx.arc(x, y, isHl ? dotR + 3 : dotR, 0, Math.PI*2);
+      ctx.fillStyle = isHl ? '#ffffff' : colors[i];
+      ctx.fill();
+      if (isHl) {
+        ctx.beginPath();
+        ctx.arc(x, y, dotR + 3, 0, Math.PI*2);
+        ctx.strokeStyle = colors[i];
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    // X labels
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '10px Rubik';
+    ctx.textAlign = 'center';
+    for (let i = 0; i < n; i++) {
+      if (i % step === 0 || i === n-1) {
+        ctx.fillText(labels[i], xPos(i), H - pad.bottom + 16);
+      }
+    }
+
+    // Tooltip
+    if (highlightIdx !== null && highlightIdx >= 0 && tooltipData) {
+      const td = tooltipData[highlightIdx];
+      const val = values[highlightIdx];
+      const color = colors[highlightIdx];
+      const cx = xPos(highlightIdx);
+      const cy = yPos(val);
+
+      // Build lines
+      const lines = [];
+      if (td.aggregated) {
+        lines.push({ text: `${val} mg/dL`, big: true, color });
+        lines.push({ text: `ממוצע יומי`, color: 'rgba(255,255,255,0.6)' });
+        lines.push({ text: td.date, color: 'rgba(255,255,255,0.5)' });
+        lines.push({ text: `${td.count} מדידות`, color: 'rgba(255,255,255,0.4)' });
+      } else {
+        lines.push({ text: `${val} mg/dL`, big: true, color });
+        lines.push({ text: td.type, color: 'rgba(255,255,255,0.6)' });
+        lines.push({ text: `${td.date} · ${td.time}`, color: 'rgba(255,255,255,0.5)' });
+        if (td.notes) lines.push({ text: td.notes, color: 'rgba(255,255,255,0.4)' });
+      }
+
+      const lineH = 16;
+      const boxH = lines.length * lineH + 14;
+      const boxW = 140;
+      let bx = cx + 10;
+      let by = cy - boxH - 8;
+      if (bx + boxW > W - 4) bx = cx - boxW - 10;
+      if (by < 4) by = cy + 12;
+
+      ctx.fillStyle = 'rgba(20,24,40,0.95)';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, boxW, boxH, 8);
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      lines.forEach((line, idx) => {
+        ctx.fillStyle = line.color;
+        ctx.font = line.big ? 'bold 13px Rubik' : '11px Rubik';
+        ctx.textAlign = 'right';
+        ctx.fillText(line.text, bx + boxW - 8, by + 7 + lineH * idx + lineH * 0.75);
+      });
+    }
+  }
+
+  draw(null);
+
+  // Hit detection — find closest dot to mouse/touch
+  function getClosestDot(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (clientX - rect.left) * (W / rect.width);
+    const my = (clientY - rect.top) * (H / rect.height);
+    let best = -1, bestDist = dotR * 3 + 8;
+    for (let i = 0; i < n; i++) {
+      const dx = xPos(i) - mx, dy = yPos(values[i]) - my;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    }
+    return best;
+  }
+
+  let activeIdx = null;
+
+  function onMove(e) {
+    const { clientX, clientY } = e.touches ? e.touches[0] : e;
+    const idx = getClosestDot(clientX, clientY);
+    if (idx !== activeIdx) { activeIdx = idx; draw(idx); }
+  }
+
+  function onLeave() { activeIdx = null; draw(null); }
+
+  function onTouch(e) {
+    e.preventDefault();
+    const { clientX, clientY } = e.touches[0];
+    const idx = getClosestDot(clientX, clientY);
+    if (idx === activeIdx) { activeIdx = null; draw(null); }
+    else { activeIdx = idx; draw(idx); }
+  }
+
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseleave', onLeave);
+  canvas.addEventListener('touchstart', onTouch, { passive: false });
+
+  this.destroy = () => {
+    canvas.removeEventListener('mousemove', onMove);
+    canvas.removeEventListener('mouseleave', onLeave);
+    canvas.removeEventListener('touchstart', onTouch);
+  };
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────
+function renderTable() {
+  const el = document.getElementById('table-content');
+  if (entries.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div>עדיין אין מדידות.<br>הוסף מדידה ראשונה בטאב "הוסף".</div>`;
+    return;
+  }
+
+  // Group by week
+  const weeks = {};
+  entries.forEach(e => {
+    const wk = getWeekKey(e.ts);
+    if (!weeks[wk]) weeks[wk] = [];
+    weeks[wk].push(e);
+  });
+
+  el.innerHTML = Object.entries(weeks).map(([wk, wEntries]) => {
+    const avg = Math.round(wEntries.reduce((s,e) => s+e.val, 0) / wEntries.length);
+    // Use 'after' threshold for weekly avg color (most readings are after meal)
+    const avgCls = avg <= 130 ? 'green' : avg <= 140 ? 'amber' : 'red';
+    const rows = wEntries.map(e => {
+      const cls = colorClass(e.val, e.type);
+      const typeLabel = e.type === 'fast' ? 'בצום' : 'אחרי ארוחה';
+      return `<div class="entry-row" onclick="openEdit(${e.id})">
+        <div class="entry-dot ${cls}"></div>
+        <div class="entry-main">
+          <span class="entry-val ${cls}">${e.val}</span>
+          <span style="font-size:12px;color:var(--text3);margin-right:6px">mg/dL</span>
+          <div class="entry-meta">${fmtDate(e.ts)} · ${fmtTime(e.ts)}</div>
+          ${e.notes ? `<div class="entry-note">${e.notes}</div>` : ''}
+        </div>
+        <span class="entry-type ${e.type}">${typeLabel}</span>
+        <button class="entry-del" onclick="event.stopPropagation();deleteEntry(${e.id})">✕</button>
+      </div>`;
+    }).join('');
+    return `<div class="table-card" style="margin-bottom:12px">
+      <div class="week-header">
+        <span>שבוע ${wk}</span>
+        <span class="week-avg ${avgCls}">ממוצע: ${avg}</span>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+}
+
+// ── CSV EXPORT ────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (entries.length === 0) { alert('אין נתונים לייצוא'); return; }
+  const header = 'תאריך,שעה,סוג,רמת סוכר (mg/dL),הערות';
+  const rows = [...entries].sort((a,b) => new Date(a.ts)-new Date(b.ts)).map(e => {
+    const d = isoToLocal(e.ts);
+    const date = d.toLocaleDateString('he-IL');
+    const time = fmtTime(e.ts);
+    const type = e.type === 'fast' ? 'בצום' : 'אחרי ארוחה';
+    const notes = (e.notes || '').replace(/,/g, ';');
+    return `${date},${time},${type},${e.val},${notes}`;
+  });
+  const csv = '\uFEFF' + [header, ...rows].join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'מעקב-סוכר.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── PDF EXPORT (print-based, full Hebrew support) ────────────────────────
+function exportPDF() {
+  if (entries.length === 0) { alert('אין נתונים לייצוא'); return; }
+
+  const sorted = [...entries].sort((a,b) => new Date(a.ts)-new Date(b.ts));
+  const avg = Math.round(sorted.reduce((s,e) => s+e.val, 0) / sorted.length);
+  const inRange = sorted.filter(e => colorClass(e.val, e.type) === 'green').length;
+  const pct = Math.round(inRange / sorted.length * 100);
+  const exportDate = new Date().toLocaleDateString('he-IL', { day:'numeric', month:'long', year:'numeric' });
+
+  // Group by week
+  const weeks = {};
+  sorted.forEach(e => {
+    const wk = getWeekKey(e.ts);
+    if (!weeks[wk]) weeks[wk] = [];
+    weeks[wk].push(e);
+  });
+
+  const weeksHtml = Object.entries(weeks).map(([wk, wEntries]) => {
+    const wAvg = Math.round(wEntries.reduce((s,e) => s+e.val, 0) / wEntries.length);
+    const wAvgCls = wAvg <= 130 ? '#3ecf8e' : wAvg <= 140 ? '#f5a623' : '#f4645f';
+    const rows = wEntries.map((e, i) => {
+      const cls = colorClass(e.val, e.type);
+      const color = cls === 'green' ? '#1a7a4a' : cls === 'amber' ? '#8a5200' : '#9a2020';
+      const bg = i % 2 === 0 ? '#ffffff' : '#f8f8fc';
+      const typeStr = e.type === 'fast' ? 'בצום' : 'אחרי ארוחה';
+      const typeBg = e.type === 'fast' ? '#e8f0fe' : '#e8f5ed';
+      const typeColor = e.type === 'fast' ? '#1a56db' : '#1a7a4a';
+      return `<tr style="background:${bg}">
+        <td style="padding:7px 10px;font-size:13px;color:#333">${fmtDate(e.ts)}</td>
+        <td style="padding:7px 10px;font-size:13px;color:#555;font-family:monospace">${fmtTime(e.ts)}</td>
+        <td style="padding:7px 10px"><span style="background:${typeBg};color:${typeColor};padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600">${typeStr}</span></td>
+        <td style="padding:7px 10px;font-size:16px;font-weight:700;color:${color}">${e.val}</td>
+        <td style="padding:7px 10px;font-size:11px;color:#777;font-style:italic">${e.notes || ''}</td>
+      </tr>`;
+    }).join('');
+
+    return `<div style="margin-bottom:20px;break-inside:avoid">
+      <div style="background:#2d3748;color:#e2e8f0;padding:9px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:600">שבוע ${wk}</span>
+        <span style="font-size:13px;color:${wAvgCls};font-weight:700">ממוצע: ${wAvg} mg/dL</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;overflow:hidden">
+        <thead>
+          <tr style="background:#f1f5f9">
+            <th style="padding:7px 10px;font-size:11px;color:#666;text-align:right;font-weight:600">תאריך</th>
+            <th style="padding:7px 10px;font-size:11px;color:#666;text-align:right;font-weight:600">שעה</th>
+            <th style="padding:7px 10px;font-size:11px;color:#666;text-align:right;font-weight:600">סוג</th>
+            <th style="padding:7px 10px;font-size:11px;color:#666;text-align:right;font-weight:600">mg/dL</th>
+            <th style="padding:7px 10px;font-size:11px;color:#666;text-align:right;font-weight:600">הערות</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<title>מעקב סוכר</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing:border-box; }
+  body { font-family:'Rubik',sans-serif; direction:rtl; margin:0; padding:24px; background:#fff; color:#1a1a2e; }
+  @media print {
+    body { padding:12px; }
+    @page { margin:15mm; size:A4; }
+  }
+</style>
+</head>
+<body>
+  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:20px">
+    <div style="font-size:22px;font-weight:700;margin-bottom:4px">מעקב סוכר — סוכרת היריון</div>
+    <div style="font-size:13px;color:#a0aec0">דוח מיוצא: ${exportDate} · ${sorted.length} מדידות</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:24px;font-weight:700;color:#166534">${avg}</div>
+      <div style="font-size:11px;color:#4ade80;margin-top:2px">ממוצע כללי mg/dL</div>
+    </div>
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:24px;font-weight:700;color:#1e40af">${pct}%</div>
+      <div style="font-size:11px;color:#60a5fa;margin-top:2px">בטווח תקין</div>
+    </div>
+    <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center">
+      <div style="font-size:24px;font-weight:700;color:#334155">${sorted.length}</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:2px">סה"כ מדידות</div>
+    </div>
+  </div>
+
+  <div style="background:#fef9e7;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:#78350f">
+    <strong>טווחים תקינים:</strong> אחרי ארוחה ≤130 ✓ · 131–140 ⚠ · מעל 140 ✗ &nbsp;|&nbsp; בצום &lt;90 ✓ · 90–95 ⚠ · מעל 95 ✗
+  </div>
+
+  ${weeksHtml}
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+// ── FULLSCREEN GRAPH ─────────────────────────────────────────────────────
+function openFullscreen() {
+  const fs = document.getElementById('graph-fullscreen');
+  fs.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Clone zoom buttons into fullscreen
+  const zoomRow = document.getElementById('fs-zoom-row');
+  zoomRow.innerHTML = `
+    <button class="zoom-btn${zoomDays===7?' active':''}" onclick="event.stopPropagation();setZoomFS(7,this)">7 ימים</button>
+    <button class="zoom-btn${zoomDays===30?' active':''}" onclick="event.stopPropagation();setZoomFS(30,this)">30 ימים</button>
+    <button class="zoom-btn${zoomDays===90?' active':''}" onclick="event.stopPropagation();setZoomFS(90,this)">90 ימים</button>
+    <button class="zoom-btn${zoomDays===0?' active':''}" onclick="event.stopPropagation();setZoomFS(0,this)">הכל</button>`;
+
+  setTimeout(renderFullscreenGraph, 50);
+}
+
+function setZoomFS(days, el) {
+  zoomDays = days;
+  document.querySelectorAll('#fs-zoom-row .zoom-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  // Also sync main zoom buttons
+  document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+  const mainBtn = document.getElementById(`ztoggle-${days}`);
+  if (mainBtn) mainBtn.classList.add('active');
+  renderFullscreenGraph();
+}
+
+function closeFullscreen() {
+  document.getElementById('graph-fullscreen').classList.remove('open');
+  document.body.style.overflow = '';
+  renderGraph(); // re-render main graph too
+}
+
+function renderFullscreenGraph() {
+  let filtered = graphType === 'all' ? entries : entries.filter(e => e.type === graphType);
+  if (zoomDays > 0) {
+    const cutoff = Date.now() - zoomDays * 24 * 60 * 60 * 1000;
+    filtered = filtered.filter(e => new Date(e.ts).getTime() >= cutoff);
+  }
+  let sorted = [...filtered].sort((a,b) => new Date(a.ts) - new Date(b.ts));
+
+  const canvas = document.getElementById('glucoseChartFS');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const container = canvas.parentElement;
+  const W = container.offsetWidth - 0;
+  const H = container.offsetHeight - 0;
+  canvas.style.height = H + 'px';
+
+  if (sorted.length === 0) {
+    canvas.width = W * window.devicePixelRatio;
+    canvas.height = H * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.fillStyle = '#1e2333';
+    ctx.beginPath(); ctx.roundRect(0,0,W,H,10); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.font = '14px Rubik';
+    ctx.textAlign = 'center';
+    ctx.fillText('אין נתונים בטווח הנבחר', W/2, H/2);
+    return;
+  }
+
+  const shouldAggregate = zoomDays >= 90 || (zoomDays === 0 && sorted.length > 60);
+  let labels, values, colors;
+
+  if (shouldAggregate) {
+    const days = {};
+    sorted.forEach(e => {
+      const key = new Date(e.ts).toLocaleDateString('en-CA');
+      if (!days[key]) days[key] = [];
+      days[key].push(e);
+    });
+    const dayKeys = Object.keys(days).sort();
+    labels = dayKeys.map(k => { const d = new Date(k); return `${d.getDate()}/${d.getMonth()+1}`; });
+    values = dayKeys.map(k => Math.round(days[k].reduce((s,e) => s+e.val,0) / days[k].length));
+    colors = dayKeys.map((_,i) => colorHex(colorClass(values[i], graphType === 'fast' ? 'fast' : 'after')));
+  } else {
+    labels = sorted.map(e => {
+      const d = new Date(e.ts);
+      if (zoomDays === 7) {
+        const days = ['א','ב','ג','ד','ה','ו','ש'];
+        return `${days[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+      }
+      return fmtDateShort(e.ts);
+    });
+    values = sorted.map(e => e.val);
+    colors = sorted.map(e => colorHex(colorClass(e.val, e.type)));
+  }
+
+  const maxTicks = 12;
+  const step = Math.max(1, Math.ceil(labels.length / maxTicks));
+  const limitLine = graphType === 'fast' ? 95 : graphType === 'after' ? 140 : null;
+
+  // Build tooltip data for fullscreen too
+  let fsTooltipData;
+  if (shouldAggregate) {
+    const days2 = {};
+    sorted.forEach(e => {
+      const key = new Date(e.ts).toLocaleDateString('en-CA');
+      if (!days2[key]) days2[key] = [];
+      days2[key].push(e);
+    });
+    const dayKeys2 = Object.keys(days2).sort();
+    fsTooltipData = dayKeys2.map(k => ({
+      aggregated: true,
+      count: days2[k].length,
+      date: new Date(k).toLocaleDateString('he-IL', { day:'numeric', month:'long' })
+    }));
+  } else {
+    fsTooltipData = sorted.map(e => ({
+      aggregated: false,
+      time: fmtTime(e.ts),
+      date: fmtDate(e.ts),
+      type: e.type === 'fast' ? 'בצום' : 'אחרי ארוחה',
+      notes: e.notes || ''
+    }));
+  }
+
+  new SimpleChart(ctx, { labels, values, colors, step, limitLine, aggregated: shouldAggregate, tooltipData: fsTooltipData, w: W, h: H });
+}
+
+// ── DELETE ALL ────────────────────────────────────────────────────────────
+function confirmDeleteAll() {
+  const modal = document.getElementById('delete-modal');
+  modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+  document.getElementById('delete-modal').style.display = 'none';
+}
+
+function deleteAllConfirmed() {
+  localStorage.removeItem(STORE_KEY);
+  entries = [];
+  closeDeleteModal();
+  renderTable();
+  renderGraph();
+  renderStats();
+  // Show feedback
+  const btn = document.querySelector('button[onclick="confirmDeleteAll()"]');
+  if (btn) {
+    btn.textContent = '✓ נמחק';
+    setTimeout(() => { btn.innerHTML = '🗑️ מחק את כל הנתונים'; }, 2000);
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+load();
+setDefaults();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/glucosetrack/sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
