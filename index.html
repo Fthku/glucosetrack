@@ -309,7 +309,10 @@ function isoToLocal(iso) { return new Date(iso); }
 
 function fmtDate(iso) {
   const d = isoToLocal(iso);
-  return d.toLocaleDateString('he-IL', { day:'numeric', month:'short', year:'numeric' });
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 function fmtTime(iso) {
